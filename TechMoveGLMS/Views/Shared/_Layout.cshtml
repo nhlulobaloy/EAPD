@@ -1,0 +1,105 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TechMove GLMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+            .navbar-brand {
+                font-weight: bold;
+            }
+            .nav-link:hover {
+                background-color: rgba(255,255,255,0.1);
+                border-radius: 5px;
+            }
+            .breadcrumb {
+                background-color: #f8f9fa;
+                padding: 10px;
+                border-radius: 5px;
+                margin-bottom: 20px;
+            }
+            .btn-back {
+                margin-bottom: 15px;
+            }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">🚚 TechMove GLMS</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">🏠 Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Contracts">📄 Contracts</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Clients">👥 Clients</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-3">
+        <!-- Breadcrumb navigation -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb" id="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+            </ol>
+        </nav>
+
+        <!-- Back button -->
+        <button class="btn btn-secondary btn-back" onclick="goBack()">← Back</button>
+
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Back button function
+        function goBack() {
+        window.history.back();
+        }
+
+        // Update breadcrumb based on current URL
+        function updateBreadcrumb() {
+        const path = window.location.pathname;
+        const breadcrumb = document.getElementById('breadcrumb');
+            
+        if (path === '/' || path === '/Home' || path === '/Home/Index') {
+        breadcrumb.innerHTML = '<li class="breadcrumb-item active">Home</li>';
+        } else {
+        let parts = path.split('/').filter(p => p);
+        let html = '<li class="breadcrumb-item"><a href="/">Home</a></li>';
+        let currentPath = '';
+                
+        for (let i = 0; i < parts.length; i++) {
+        currentPath += '/' + parts[i];
+        let displayName = parts[i];
+                    
+        if (i === parts.length - 1) {
+        html += `<li class="breadcrumb-item active">${displayName}</li>`;
+        } else {
+        html += `<li class="breadcrumb-item"><a href="${currentPath}">${displayName}</a></li>`;
+        }
+        }
+        breadcrumb.innerHTML = html;
+        }
+        }
+        
+        updateBreadcrumb();
+    </script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

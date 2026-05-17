@@ -1,0 +1,47 @@
+@model TechMoveGLMS.Models.ServiceRequest
+
+@{
+    ViewData["Title"] = "Create Service Request";
+    var contract = ViewBag.Contract as TechMoveGLMS.Models.Contract;
+    var exchangeRate = ViewBag.ExchangeRate;
+}
+
+<h2>Create Service Request for Contract: @contract?.Client?.Name</h2>
+<p><strong>Contract Status:</strong> @contract?.Status</p>
+<p><strong>Exchange Rate (USD to ZAR):</strong> @exchangeRate</p>
+
+<form asp-action="Create" method="post">
+    <input type="hidden" asp-for="ContractId" />
+    <input type="hidden" name="exchangeRate" value="@exchangeRate" />
+
+    <div class="form-group mb-3">
+        <label>Description</label>
+        <textarea asp-for="Description" class="form-control" required></textarea>
+    </div>
+
+    <div class="form-group mb-3">
+        <label>Cost (USD)</label>
+        <input asp-for="CostUSD" type="number" step="0.01" class="form-control" id="costUSD" required />
+    </div>
+
+    <div class="form-group mb-3">
+        <label>Cost (ZAR) - Auto Calculated</label>
+        <input type="text" id="costZAR" class="form-control" readonly />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a asp-controller="Contracts" asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <script>
+        const rate = @exchangeRate;
+        const usdInput = document.getElementById('costUSD');
+        const zarInput = document.getElementById('costZAR');
+        
+        usdInput.addEventListener('input', function() {
+            const usd = parseFloat(usdInput.value) || 0;
+            zarInput.value = (usd * rate).toFixed(2);
+        });
+    </script>
+}
