@@ -1,3 +1,9 @@
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using System;
+using System.IO;
+using System.Threading.Tasks;
+
 namespace TechMoveGLMS.Services
 {
     public class FileService : IFileService
@@ -6,7 +12,7 @@ namespace TechMoveGLMS.Services
 
         public FileService(IWebHostEnvironment env)
         {
-            _uploadFolder = Path.Combine(env.WebRootPath ?? "wwwroot", "contracts");
+            _uploadFolder = Path.Combine(env.WebRootPath, "contracts");
 
             if (!Directory.Exists(_uploadFolder))
             {

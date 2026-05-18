@@ -1,0 +1,52 @@
+## .NET Core
+bin/
+obj/
+Migrations/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+## Visual Studio
+.vs/
+*.vsp
+*.psess
+
+## SQL Server files
+*.mdf
+*.ldf
+
+## VS Code
+.vscode/
+
+## User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+
+## Test results
+TestResults/
+
+## Windows Image Cache
+Thumbs.db
+Desktop.ini
+
+## EF Core
+Migrations/
+
+## Node
+node_modules/

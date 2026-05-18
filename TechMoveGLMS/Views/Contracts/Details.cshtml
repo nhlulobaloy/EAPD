@@ -1,0 +1,56 @@
+﻿@model TechMoveGLMS.Models.Contract
+
+@{
+    ViewData["Title"] = "Contract Details";
+}
+
+<h2>Contract Details</h2>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p><strong>Client:</strong> @Model.Client?.Name</p>
+        <p><strong>Status:</strong> @Model.Status</p>
+        <p><strong>Start Date:</strong> @Model.StartDate.ToShortDateString()</p>
+        <p><strong>End Date:</strong> @Model.EndDate.ToShortDateString()</p>
+        <p><strong>Service Level:</strong> @Model.ServiceLevel</p>
+        @if (!string.IsNullOrEmpty(Model.SignedAgreementPath))
+        {
+            <p><strong>Signed Agreement:</strong> <a asp-action="DownloadPdf" asp-route-id="@Model.Id">Download PDF</a></p>
+        }
+    </div>
+</div>
+
+<h3>Service Requests</h3>
+
+@if (Model.ServiceRequests != null && Model.ServiceRequests.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Cost (USD)</th>
+                <th>Cost (ZAR)</th>
+                <th>Status</th>
+                <th>Created Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sr in Model.ServiceRequests)
+            {
+                <tr>
+                    <td>@sr.Description</td>
+                    <td>$@sr.CostUSD</td>
+                    <td>R@sr.CostZAR</td>
+                    <td>@sr.Status</td>
+                    <td>@sr.CreatedAt.ToShortDateString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No service requests found for this contract.</p>
+}
+
+<a asp-action="Index" class="btn btn-secondary">Back to Contracts</a>

@@ -51,14 +51,45 @@ namespace TechMoveGLMS.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        // [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Contract contract, IFormFile SignedAgreement)
         {
+            Console.WriteLine("=== CREATE METHOD CALLED ===");
+            Console.WriteLine($"ClientId: {contract.ClientId}");
+            Console.WriteLine($"StartDate: {contract.StartDate}");
+            Console.WriteLine($"EndDate: {contract.EndDate}");
+            Console.WriteLine($"Status: {contract.Status}");
+            Console.WriteLine($"ServiceLevel: {contract.ServiceLevel}");
+            Console.WriteLine($"File: {(SignedAgreement != null ? SignedAgreement.FileName : "NO FILE")}");
+            Console.WriteLine($"File Size: {(SignedAgreement != null ? SignedAgreement.Length.ToString() : "0")}");
+
+            // REMOVE THIS LINE BELOW - DELETE IT
+            // ViewBag.Clients = await _context.Clients.ToListAsync();
+
             if (ModelState.IsValid)
             {
-                if (SignedAgreement != null)
+                Console.WriteLine("ModelState is VALID");
+
+                // Handle file upload
+                if (SignedAgreement != null && SignedAgreement.Length > 0)
                 {
-                    contract.SignedAgreementPath = await _fileService.SavePdfFile(SignedAgreement);
+                    Console.WriteLine("File received, attempting to save...");
+                    try
+                    {
+                        contract.SignedAgreementPath = await _fileService.SavePdfFile(SignedAgreement);
+                        Console.WriteLine($"File saved at: {contract.SignedAgreementPath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"ERROR saving file: {ex.Message}");
+                        ModelState.AddModelError("", ex.Message);
+                        ViewBag.Clients = await _context.Clients.ToListAsync();
+                        return View(contract);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No file uploaded - continuing without PDF");
                 }
 
                 if (string.IsNullOrEmpty(contract.Status))
@@ -66,9 +97,22 @@ namespace TechMoveGLMS.Controllers
                     contract.Status = "Draft";
                 }
 
+                Console.WriteLine("Saving contract to database...");
                 _context.Add(contract);
                 await _context.SaveChangesAsync();
+                Console.WriteLine("Contract saved successfully!");
                 return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                Console.WriteLine("ModelState is INVALID");
+                foreach (var key in ModelState.Keys)
+                {
+                    foreach (var error in ModelState[key].Errors)
+                    {
+                        Console.WriteLine($"Error in {key}: {error.ErrorMessage}");
+                    }
+                }
             }
 
             ViewBag.Clients = await _context.Clients.ToListAsync();
@@ -99,6 +143,15 @@ namespace TechMoveGLMS.Controllers
             memory.Position = 0;
 
             return File(memory, "application/pdf", Path.GetFileName(filePath));
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var contract = await _context.Contracts
+                .Include(c => c.Client)
+                .Include(c => c.ServiceRequests)
+                .FirstOrDefaultAsync(c => c.Id == id);
+            return View(contract);
         }
     }
 }

@@ -6,7 +6,7 @@ namespace TechMoveGLMS.Models
     {
         public int Id { get; set; }
         public int ClientId { get; set; }
-        public Client Client { get; set; } = null!;
+        public Client? Client { get; set; }  // MAKE THIS NULLABLE (add ?)
 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
