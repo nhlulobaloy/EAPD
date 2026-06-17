@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TechMoveGLMS.Data;
 using TechMoveGLMS.Models;
 using TechMoveGLMS.Services;
 
@@ -8,27 +6,25 @@ namespace TechMoveGLMS.Controllers
 {
     public class ServiceRequestsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ITechMoveApiClient _apiClient;
         private readonly ICurrencyService _currencyService;
         private readonly IContractValidator _contractValidator;
 
         public ServiceRequestsController(
-            ApplicationDbContext context,
+            ITechMoveApiClient apiClient,
             ICurrencyService currencyService,
             IContractValidator contractValidator)
         {
-            _context = context;
+            _apiClient = apiClient;
             _currencyService = currencyService;
             _contractValidator = contractValidator;
         }
 
         public async Task<IActionResult> Create(int contractId)
         {
-            var contract = await _context.Contracts
-                .Include(c => c.Client)
-                .FirstOrDefaultAsync(c => c.Id == contractId);
+            var contract = await _apiClient.GetContractAsync(contractId);
 
-            if (contract == null)
+            if (contract is null)
             {
                 return NotFound();
             }
@@ -51,8 +47,8 @@ namespace TechMoveGLMS.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ServiceRequest serviceRequest, decimal exchangeRate)
         {
-            var contract = await _context.Contracts.FindAsync(serviceRequest.ContractId);
-            if (contract == null)
+            var contract = await _apiClient.GetContractAsync(serviceRequest.ContractId);
+            if (contract is null)
             {
                 ModelState.AddModelError("", "Contract not found");
                 return View(serviceRequest);
@@ -64,10 +60,13 @@ namespace TechMoveGLMS.Controllers
                 serviceRequest.Status = "Pending";
                 serviceRequest.CreatedAt = DateTime.UtcNow;
 
-                _context.Add(serviceRequest);
-                await _context.SaveChangesAsync();
+                var created = await _apiClient.CreateServiceRequestAsync(serviceRequest);
+                if (created is not null)
+                {
+                    return RedirectToAction("Index", "Contracts");
+                }
 
-                return RedirectToAction("Index", "Contracts");
+                ModelState.AddModelError("", "Service request could not be created.");
             }
 
             ViewBag.Contract = contract;

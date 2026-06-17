@@ -6,8 +6,7 @@ namespace TechMoveGLMS.Models
     {
         public int Id { get; set; }
         public int ClientId { get; set; }
-        public Client? Client { get; set; }  // MAKE THIS NULLABLE (add ?)
-
+        public Client? Client { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 
@@ -16,7 +15,6 @@ namespace TechMoveGLMS.Models
 
         public string ServiceLevel { get; set; } = string.Empty;
         public string? SignedAgreementPath { get; set; }
-
         public ICollection<ServiceRequest> ServiceRequests { get; set; } = new List<ServiceRequest>();
     }
 }

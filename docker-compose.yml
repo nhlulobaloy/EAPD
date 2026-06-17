@@ -1,0 +1,46 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: techmoveglms-sql
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "TechMoveGLMS!2026"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P TechMoveGLMS!2026 -C -Q \"SELECT 1\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: TechMoveGLMS.API/Dockerfile
+    container_name: techmoveglms-api
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_URLS: "http://+:8080"
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=GLMS_DB;User Id=sa;Password=TechMoveGLMS!2026;TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=true"
+    ports:
+      - "5001:8080"
+
+  mvc:
+    build:
+      context: .
+      dockerfile: TechMoveGLMS/Dockerfile
+    container_name: techmoveglms-mvc
+    depends_on:
+      - api
+    environment:
+      ASPNETCORE_URLS: "http://+:8080"
+      ApiSettings__BaseUrl: "http://api:8080/"
+    ports:
+      - "5000:8080"
+
+volumes:
+  sqlserver-data:

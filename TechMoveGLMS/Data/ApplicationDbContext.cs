@@ -19,14 +19,14 @@ namespace TechMoveGLMS.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Contract>()
-                .HasOne(c => c.Client)
-                .WithMany(c => c.Contracts)
-                .HasForeignKey(c => c.ClientId);
+                .HasOne(contract => contract.Client)
+                .WithMany(client => client.Contracts)
+                .HasForeignKey(contract => contract.ClientId);
 
             modelBuilder.Entity<ServiceRequest>()
-                .HasOne(s => s.Contract)
-                .WithMany(c => c.ServiceRequests)
-                .HasForeignKey(s => s.ContractId);
+                .HasOne(request => request.Contract)
+                .WithMany(contract => contract.ServiceRequests)
+                .HasForeignKey(request => request.ContractId);
         }
     }
 }

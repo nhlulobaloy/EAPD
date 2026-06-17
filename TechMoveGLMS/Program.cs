@@ -1,30 +1,31 @@
-using Microsoft.EntityFrameworkCore;
-using TechMoveGLMS.Data;
 using TechMoveGLMS.Services;
-using TechMoveGLMS.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
-// Use REAL SQL Server
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IContractValidator, ContractValidator>();
 builder.Services.AddHttpClient<ICurrencyService, CurrencyService>();
+builder.Services.AddHttpClient<ITechMoveApiClient, TechMoveApiClient>(client =>
+{
+    var baseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7001/";
+    client.BaseAddress = new Uri(baseUrl);
+});
 
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();

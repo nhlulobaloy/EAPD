@@ -7,7 +7,6 @@ namespace TechMoveGLMS.Models
         public string ContactEmail { get; set; } = string.Empty;
         public string ContactPhone { get; set; } = string.Empty;
         public string Region { get; set; } = string.Empty;
-
         public ICollection<Contract> Contracts { get; set; } = new List<Contract>();
     }
 }

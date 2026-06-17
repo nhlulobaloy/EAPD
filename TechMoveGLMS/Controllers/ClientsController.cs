@@ -1,41 +1,42 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TechMoveGLMS.Data;
 using TechMoveGLMS.Models;
+using TechMoveGLMS.Services;
 
 namespace TechMoveGLMS.Controllers
 {
     public class ClientsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ITechMoveApiClient _apiClient;
 
-        public ClientsController(ApplicationDbContext context)
+        public ClientsController(ITechMoveApiClient apiClient)
         {
-            _context = context;
-        }
-
-        public async Task<IActionResult> Index()
-        {
-            var clients = await _context.Clients.Include(c => c.Contracts).ToListAsync();
-            return View(clients);
+            _apiClient = apiClient;
         }
 
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var clients = await _apiClient.GetClientsAsync();
+            return View(clients);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Client client)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(client);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var clients = await _apiClient.GetClientsAsync();
+                return View("Index", clients);
             }
-            return View(client);
+
+            var created = await _apiClient.CreateClientAsync(client);
+            if (created is null)
+            {
+                TempData["Error"] = "Client could not be created.";
+            }
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }
